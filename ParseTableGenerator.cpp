@@ -18,7 +18,30 @@ void ParseTableGenerator::generateParseTable() {
 }
 
 void ParseTableGenerator::computeFirsts() {
-//TODO:Implement
+
+    for (const auto &nonTerminal:cfg.nonTerminals) {
+        computeFirsts(nonTerminal);
+    }
+}
+
+void ParseTableGenerator::computeFirsts(string nonTerminal) {
+
+    Production productions = cfg.productions[nonTerminal];
+
+    for (const auto &production:productions.productions) {
+
+        if (production.empty()) continue;
+
+        if (production.size() == 1 && production[0] == string(1, CFG::EPSILON)) {
+            firstsMap[nonTerminal]->insert(string(1, CFG::EPSILON));
+        } else if (isTerminal(production[0])) {
+            firstsMap[nonTerminal]->insert(production[0]);
+        } else {
+            for (const auto &token:production) {
+                //TODO:Implement
+            }
+        }
+    }
 }
 
 void ParseTableGenerator::computeFollows() {
@@ -32,3 +55,9 @@ void ParseTableGenerator::buildParseTable() {
 ParsingTable *ParseTableGenerator::getParsingTable() const {
     return parsingTable;
 }
+
+bool ParseTableGenerator::isTerminal(const basic_string<char> &token) {
+    return cfg.terminals.find(token) != cfg.terminals.end();
+}
+
+

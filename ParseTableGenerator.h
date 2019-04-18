@@ -8,7 +8,7 @@
 
 #include "models/CFG.h"
 #include "models/ParsingTable.h"
-#include <unordered_set>
+#include <set>
 
 using namespace std;
 
@@ -21,8 +21,8 @@ public:
 private:
     CFG cfg;
     ParsingTable *parsingTable;
-    unordered_map<string, vector<string> *> firstsMap;
-    unordered_map<string, vector<string> *> followsMap;
+    unordered_map<string, set<string> *> firstsMap;
+    unordered_map<string, set<string> *> followsMap;
 
     void generateParseTable();
 
@@ -32,6 +32,9 @@ private:
 
     void buildParseTable();
 
+    void computeFirsts(string nonTerminal);
+
+    bool isTerminal(const basic_string<char> &token);
 };
 
 
