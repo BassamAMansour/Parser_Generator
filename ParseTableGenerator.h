@@ -21,8 +21,8 @@ public:
 private:
     CFG cfg;
     ParsingTable *parsingTable;
-    unordered_map<string, vector<string>> firstsMap;
-    unordered_map<string, vector<string>> followsMap;
+    unordered_map<string, vector<string> *> firstsMap;
+    unordered_map<string, vector<string> *> followsMap;
 
     void generateParseTable();
 
