@@ -37,9 +37,18 @@ void ParseTableGenerator::computeFirsts(string nonTerminal) {
         } else if (isTerminal(production[0])) {
             firstsMap[nonTerminal]->insert(production[0]);
         } else {
+            bool nonEpsilonFirstFound = false;
+
             for (const auto &token:production) {
-                //TODO:Implement
+                computeFirsts(token);
+                if (!hasEpsilonFirstOnly(token)) {
+                    firstsMap[nonTerminal]->insert(firstsMap[token]->begin(), firstsMap[token]->end());
+                    nonEpsilonFirstFound = true;
+                    break;
+                }
             }
+
+            if (!nonEpsilonFirstFound) firstsMap[nonTerminal]->insert(string(1, CFG::EPSILON));
         }
     }
 }
@@ -56,8 +65,13 @@ ParsingTable *ParseTableGenerator::getParsingTable() const {
     return parsingTable;
 }
 
-bool ParseTableGenerator::isTerminal(const basic_string<char> &token) {
+bool ParseTableGenerator::isTerminal(const string &token) {
     return cfg.terminals.find(token) != cfg.terminals.end();
+}
+
+bool ParseTableGenerator::hasEpsilonFirstOnly(const string &token) {
+    return (firstsMap[token]->size() == 1 &&
+            firstsMap[token]->find(string(1, CFG::EPSILON)) != firstsMap[token]->end());
 }
 
 

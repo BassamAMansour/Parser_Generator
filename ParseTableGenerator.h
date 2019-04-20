@@ -34,7 +34,9 @@ private:
 
     void computeFirsts(string nonTerminal);
 
-    bool isTerminal(const basic_string<char> &token);
+    bool isTerminal(const string &token);
+
+    bool hasEpsilonFirstOnly(const string &token);
 };
 
 
