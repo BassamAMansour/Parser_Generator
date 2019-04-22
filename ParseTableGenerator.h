@@ -30,13 +30,18 @@ private:
 
     void computeFollows();
 
-    void buildParseTable();
-
     void computeFirsts(string nonTerminal);
+
+    void computeFollows(string targetNonTerminal);
+
+    void buildParseTable();
 
     bool isTerminal(const string &token);
 
+    bool isNonTerminal(const string &token);
+
     bool hasEpsilonFirstOnly(const string &token);
+
 };
 
 
