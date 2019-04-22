@@ -42,6 +42,8 @@ private:
 
     bool hasEpsilonFirstOnly(const string &token);
 
+    bool findInSet(const string &token, set<string> group);
+
 };
 
 

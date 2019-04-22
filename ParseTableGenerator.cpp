@@ -110,7 +110,33 @@ void ParseTableGenerator::computeFollows(string targetNonTerminal) {
 }
 
 void ParseTableGenerator::buildParseTable() {
-//TODO:Implement
+    int counter=0;
+    for (const auto &nonTerminal:cfg.nonTerminals) {
+        set<string> firsts = firstsMap[nonTerminal];
+        set<string> follows =  followsMap[nonTerminal];
+            if(findInSet(string(1,CFG::EPSILON),firsts)){
+                if(findInSet(string(1,ParsingTable::END_OF_TOKENS),follows)){
+                    //CASE 3
+                    parsingTable->table[nonTerminal][ParsingTable::END_OF_TOKENS]=cfg.productions.at(nonTerminal).productions.at(counter);
+
+                }else{
+                    //CASE 2
+                    for (const auto &follow:follows) {
+                        parsingTable->table[nonTerminal][follow]=cfg.productions.at(nonTerminal).productions.at(counter);
+                        counter++;
+                    }
+                }
+
+            }else{
+                //CASE 1
+                for (const auto &first:firsts) {
+                    parsingTable->table[nonTerminal][first]=cfg.productions.at(nonTerminal).productions.at(counter);
+                    counter++;
+                }
+            }
+            counter=0;
+        }
+
 }
 
 ParsingTable *ParseTableGenerator::getParsingTable() const {
@@ -128,6 +154,10 @@ bool ParseTableGenerator::isNonTerminal(const string &token) {
 bool ParseTableGenerator::hasEpsilonFirstOnly(const string &token) {
     return (firstsMap[token]->size() == 1 &&
             firstsMap[token]->find(string(1, CFG::EPSILON)) != firstsMap[token]->end());
+}
+
+bool ParseTableGenerator::findInSet(const string &token, set<string> group) {
+    return group.find(token) != group.end();
 }
 
 
