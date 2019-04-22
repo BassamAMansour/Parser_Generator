@@ -11,7 +11,6 @@ ParseTableGenerator::ParseTableGenerator(const CFG &cfg) : cfg(cfg) {
 }
 
 void ParseTableGenerator::generateParseTable() {
-
     computeFirsts();
     computeFollows();
     buildParseTable();
