@@ -4,13 +4,13 @@
 
 #include "ParsingTable.h"
 
-ParsingTable::ParsingTable(const unordered_set<string> &terminals, const unordered_set<string> &nonTerminals) {
+ParsingTable::ParsingTable(const set<string> &terminals, const set<string> &nonTerminals) {
     initTerminalsIndices(terminals);
     initNonTerminalsIndices(nonTerminals);
     initEntriesTable(terminals.size(), nonTerminals.size());
 }
 
-void ParsingTable::initTerminalsIndices(unordered_set<string> terminals) {
+void ParsingTable::initTerminalsIndices(set<string> terminals) {
     int i = 0;
     for (const auto &terminal:terminals) {
         terminalsIndices[terminal] = i++;
@@ -18,7 +18,7 @@ void ParsingTable::initTerminalsIndices(unordered_set<string> terminals) {
     terminalsIndices[string(1, END_OF_TOKENS)] = i;
 }
 
-void ParsingTable::initNonTerminalsIndices(unordered_set<string> nonTerminals) {
+void ParsingTable::initNonTerminalsIndices(set<string> nonTerminals) {
     int i = 0;
     for (const auto &nonTerminal:nonTerminals) {
         nonTerminalsIndices[nonTerminal] = i++;

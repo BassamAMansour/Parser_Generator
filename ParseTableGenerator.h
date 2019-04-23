@@ -30,7 +30,7 @@ private:
 
     void computeFollows();
 
-    void computeFirsts(string nonTerminal);
+    void computeFirsts(string nonTerminal, set<string> &computedFirsts);
 
     void computeFollows(string targetNonTerminal);
 
@@ -48,6 +48,9 @@ private:
 
     bool isFollow(const string &token);
 
+    bool hasEpsilonInFirsts(const basic_string<char> &nonTerminal);
+
+    void eraseEpsilonFromFollows(const string &nonTerminal);
 };
 
 
