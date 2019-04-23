@@ -128,8 +128,8 @@ void ParseTableGenerator::buildParseTable() {
 
                 }else{
                     //CASE 2
-                    for (const auto &follow:followsMap[nonTerminal]) {
-                        int terminalIndexFollow = parsingTable->terminalsIndices.at(follow);
+                    for(set<string>::iterator it =follows->begin(); it != follows->end(); ++it){
+                        int terminalIndexFollow = parsingTable->terminalsIndices.at(*it);
                         parsingTable->entriesTable[nonIndex][terminalIndexFollow]=cfg.productions.at(nonTerminal).productions[counter];
                         counter++;
                     }
@@ -137,8 +137,8 @@ void ParseTableGenerator::buildParseTable() {
 
             }else{
                 //CASE 1
-                for (const auto &first:firstsMap[nonTerminal]) {
-                    int terminalIndexFirst = parsingTable->terminalsIndices.at(first);
+            for(set<string>::iterator it =firsts->begin(); it != firsts->end(); ++it){
+                    int terminalIndexFirst = parsingTable->terminalsIndices.at(*it);
                     parsingTable->entriesTable[nonIndex][terminalIndexFirst]=cfg.productions.at(nonTerminal).productions[counter];
                     counter++;
                 }
