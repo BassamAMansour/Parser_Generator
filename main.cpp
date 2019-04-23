@@ -8,7 +8,7 @@ int main() {
     CFG_Generator cfgGenerator(language);
     CFG cfg = cfgGenerator.getCfg();
 
-//    ParsingTable *parsingTable = ParseTableGenerator(cfg).getParsingTable();
+    ParsingTable *parsingTable = ParseTableGenerator(cfg).getParsingTable();
 
     //TODO: Do something useful with that parsing table... XD
 

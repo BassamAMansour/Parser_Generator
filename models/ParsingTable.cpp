@@ -33,15 +33,4 @@ void ParsingTable::initEntriesTable(unsigned int terminalsSize, unsigned int non
     }
 }
 
-void ParsingTable::initTable(unordered_set<string> terminals, unordered_set<string> nonTerminals) {
-    vector<vector<string>> *vec = new vector<vector<string>>;
-    for (const auto &nonTerminal:nonTerminals) {
-        unordered_map<string,vector<vector<string>>> *inner = new unordered_map<string , vector<vector<string>>>;
-        for (const auto &terminal:terminals) {
-            inner->insert(make_pair(terminal,vec));
-        }
-        table.insert(make_pair(nonTerminal,inner));
-    }
-
-}
 

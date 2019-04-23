@@ -25,7 +25,6 @@ public:
      * For a table entry with empty vector, it's considered an invalid transition.
      * */
     vector<vector<vector<string>>> entriesTable;
-    unordered_map<string,unordered_map<string,vector<string>>> table;
     unordered_map<string, int> terminalsIndices;
     unordered_map<string, int> nonTerminalsIndices;
 
@@ -34,7 +33,6 @@ public:
     void initNonTerminalsIndices(unordered_set<string> nonTerminals);
 
     void initEntriesTable(unsigned int terminalsSize, unsigned int nonTerminalsSize);
-    void initTable(unordered_set<string> terminals, unordered_set<string> nonTerminals);
 };
 
 

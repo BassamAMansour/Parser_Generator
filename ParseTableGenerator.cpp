@@ -3,6 +3,8 @@
 //
 
 #include <algorithm>
+#include <stack>
+#include <iostream>
 #include "ParseTableGenerator.h"
 
 ParseTableGenerator::ParseTableGenerator(const CFG &cfg) : cfg(cfg) {
@@ -15,6 +17,7 @@ void ParseTableGenerator::generateParseTable() {
     computeFirsts();
     computeFollows();
     buildParseTable();
+   // runSimulation();
 }
 
 void ParseTableGenerator::computeFirsts() {
@@ -111,26 +114,32 @@ void ParseTableGenerator::computeFollows(string targetNonTerminal) {
 
 void ParseTableGenerator::buildParseTable() {
     int counter=0;
-    for (const auto &nonTerminal:cfg.nonTerminals) {
-        set<string> firsts = firstsMap[nonTerminal];
-        set<string> follows =  followsMap[nonTerminal];
-            if(findInSet(string(1,CFG::EPSILON),firsts)){
-                if(findInSet(string(1,ParsingTable::END_OF_TOKENS),follows)){
+
+    for (auto &nonTerminal:cfg.nonTerminals) {
+        set<string> *firsts = firstsMap[nonTerminal];
+        set<string> *follows = followsMap[nonTerminal];
+        int nonIndex=parsingTable->nonTerminalsIndices.at(nonTerminal);
+        if(isFirst(string(1,CFG::EPSILON))){
+                if(isFollow(string(1,ParsingTable::END_OF_TOKENS))){
                     //CASE 3
-                    parsingTable->table[nonTerminal][ParsingTable::END_OF_TOKENS]=cfg.productions.at(nonTerminal).productions.at(counter);
+                    int endSign = parsingTable->terminalsIndices.at(string(1,ParsingTable::END_OF_TOKENS));
+                    parsingTable->entriesTable[nonIndex][endSign]=cfg.productions.at(nonTerminal).productions[counter];
+
 
                 }else{
                     //CASE 2
-                    for (const auto &follow:follows) {
-                        parsingTable->table[nonTerminal][follow]=cfg.productions.at(nonTerminal).productions.at(counter);
+                    for (const auto &follow:followsMap[nonTerminal]) {
+                        int terminalIndexFollow = parsingTable->terminalsIndices.at(follow);
+                        parsingTable->entriesTable[nonIndex][terminalIndexFollow]=cfg.productions.at(nonTerminal).productions[counter];
                         counter++;
                     }
                 }
 
             }else{
                 //CASE 1
-                for (const auto &first:firsts) {
-                    parsingTable->table[nonTerminal][first]=cfg.productions.at(nonTerminal).productions.at(counter);
+                for (const auto &first:firstsMap[nonTerminal]) {
+                    int terminalIndexFirst = parsingTable->terminalsIndices.at(first);
+                    parsingTable->entriesTable[nonIndex][terminalIndexFirst]=cfg.productions.at(nonTerminal).productions[counter];
                     counter++;
                 }
             }
@@ -156,8 +165,37 @@ bool ParseTableGenerator::hasEpsilonFirstOnly(const string &token) {
             firstsMap[token]->find(string(1, CFG::EPSILON)) != firstsMap[token]->end());
 }
 
-bool ParseTableGenerator::findInSet(const string &token, set<string> group) {
-    return group.find(token) != group.end();
+void ParseTableGenerator::runSimulation(string input) {
+    stack<string> * stack1 = new stack<string>;
+    input.push_back(ParsingTable::END_OF_TOKENS);//add endof token to indicate the end of the input string
+    int ptr=0;//arrow on the current char in the input string
+    while(true){
+        if(stack1->top()==string(1,ParsingTable::END_OF_TOKENS)&&input.at(ptr)==ParsingTable::END_OF_TOKENS){
+            cout<<"Successful the input is accepted"<<endl;
+            break;
+        }
+
+        if(stack1->empty()&&input.at(ptr)!=ParsingTable::END_OF_TOKENS){
+            cout<<" ERROR Found compilation error at element : "<<input.at(ptr)<<endl;
+            break;
+        }
+        if(input.at(ptr)==ParsingTable::END_OF_TOKENS&&(!stack1->empty())){
+            cout<<"string accepted and all Non-Terminals go to Epsilon"<<endl;
+            break;
+        }
+        //TODO SHARAF
+
+    }
+
 }
+
+bool ParseTableGenerator::isFirst(const string &token) {
+    return firstsMap.find(token) != firstsMap.end();
+}
+
+bool ParseTableGenerator::isFollow(const string &token) {
+    return followsMap.find(token) != followsMap.end();
+}
+
 
 

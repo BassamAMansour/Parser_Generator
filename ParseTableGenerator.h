@@ -42,7 +42,11 @@ private:
 
     bool hasEpsilonFirstOnly(const string &token);
 
-    bool findInSet(const string &token, set<string> group);
+    void runSimulation(string input);
+
+    bool isFirst(const string &token);
+
+    bool isFollow(const string &token);
 
 };
 
