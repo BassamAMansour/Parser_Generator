@@ -1,13 +1,14 @@
 #include <iostream>
+#include <fstream>
 #include "CFG_Generator.h"
 #include "ParseTableGenerator.h"
 
 int main() {
+    string language = "../testFiles/test.txt";
+    CFG_Generator cfgGenerator(language);
+    CFG cfg = cfgGenerator.getCfg();
 
-    //TODO: Get CFG from text file
-    string language = "Language";
-
-    ParsingTable *parsingTable = ParseTableGenerator(CFG_Generator(language).getCfg()).getParsingTable();
+//    ParsingTable *parsingTable = ParseTableGenerator(cfg).getParsingTable();
 
     //TODO: Do something useful with that parsing table... XD
 

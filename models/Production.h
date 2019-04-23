@@ -13,6 +13,10 @@ using namespace std;
 class Production {
 
 public:
+    Production(vector<vector<string>> vector);
+
+    Production();
+
     string name;
     /**
      * Each non-terminal produces a vector of productions.

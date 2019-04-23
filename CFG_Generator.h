@@ -13,14 +13,23 @@ using namespace std;
 class CFG_Generator {
 
 public:
-    explicit CFG_Generator(const string &language);
+    explicit CFG_Generator(string language);
     const CFG &getCfg() const;
 
 private:
     string language;
+    vector<string> fileLines;
     CFG cfg;
+    vector<vector<string>> rules;
 
     void startCFGBuilding();
+    void startCFGBuildingssss();
+
+    vector<vector<string>> getRules();
+
+    CFG produceCFG();
+
+    vector<string> split(string line);
 };
 
 

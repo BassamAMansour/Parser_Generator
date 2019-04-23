@@ -3,3 +3,9 @@
 //
 
 #include "Production.h"
+
+Production::Production(vector<vector<string>> v){
+    productions = v;
+}
+
+Production::Production() {}

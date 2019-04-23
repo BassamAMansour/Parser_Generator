@@ -17,6 +17,10 @@ class CFG {
 
 
 public:
+    CFG(unordered_set<string> set, unordered_set<string> unordered_set, unordered_map<string, Production> map);
+
+    CFG();
+
     //The name of the production mapped to the productions
     unordered_map<string, Production> productions;
     unordered_set<string> terminals;
