@@ -27,7 +27,13 @@ void CFG_Generator::startCFGBuilding() {
 
     rules = getRules();
     cfg = produceCFG();
-
+    if(rules.size() == 0){
+        return;
+    } else if(rules[0].size() < 3){
+        cout << "error in first line formatting" << endl;
+        return;
+    }
+    cfg.startState = rules[0][1];
 }
 
 const CFG &CFG_Generator::getCfg() const {
@@ -69,13 +75,15 @@ CFG CFG_Generator::produceCFG() {
         vector<string> accVector;
         for(int j = 3; j < rules[i].size(); j++){
             string element = rules[i][j];
-            if(element[0] == *"‘"){
+            if(element[0] == *"‘" || element[0] == *"'"){
                 terminals.insert(element);
             } else if(element == "|"){
                 rhsProduction.push_back(accVector);
                 accVector = *new vector<string>;
                 continue;
-            } else if(element == "\L"){
+            } else if(element == "\L" || element == "\\L"){
+//                string test = string(1, CFG::EPSILON);
+                accVector.push_back("\0");
                 continue;
             } else{
                 nonTerminals.insert(element);
