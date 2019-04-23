@@ -17,17 +17,23 @@ void ParseTableGenerator::generateParseTable() {
     computeFirsts();
     computeFollows();
     buildParseTable();
-   // runSimulation();
+    // runSimulation();
 }
 
 void ParseTableGenerator::computeFirsts() {
 
+    auto *computedFirsts = new set<string>();
+
     for (const auto &nonTerminal:cfg.nonTerminals) {
-        computeFirsts(nonTerminal);
+        computeFirsts(nonTerminal, *computedFirsts);
+        computedFirsts->insert(nonTerminal);
     }
 }
 
-void ParseTableGenerator::computeFirsts(string nonTerminal) {
+void ParseTableGenerator::computeFirsts(string nonTerminal, set<string> &computedFirsts) {
+
+    if (computedFirsts.find(nonTerminal) != computedFirsts.end())
+        return;
 
     Production productions = cfg.productions[nonTerminal];
 
@@ -45,7 +51,7 @@ void ParseTableGenerator::computeFirsts(string nonTerminal) {
             bool nonEpsilonFirstFound = false;
 
             for (const auto &token:production) {
-                computeFirsts(token);
+                computeFirsts(token, computedFirsts);
                 if (!hasEpsilonFirstOnly(token)) {
                     firstsMap[nonTerminal]->insert(firstsMap[token]->begin(), firstsMap[token]->end());
                     nonEpsilonFirstFound = true;
@@ -84,67 +90,70 @@ void ParseTableGenerator::computeFollows(string targetNonTerminal) {
 
             if (targetNonTerminalIterator == production.end()) continue;
 
-            int targetNonTerminalIndex = std::distance(production.begin(), targetNonTerminalIterator);
+            int maxIndex = production.size() - 1;
+            int targetIndex = std::distance(production.begin(), targetNonTerminalIterator);
 
-            if (targetNonTerminalIndex < production.size() - 1 &&
-                isTerminal(production[targetNonTerminalIndex + 1])) {
+            string nextToken;
+            if (targetIndex < maxIndex) nextToken = production[targetIndex + 1];
 
-                followsMap[targetNonTerminal]->insert(production[targetNonTerminalIndex + 1]);
+            if (targetIndex < maxIndex && isTerminal(nextToken)) {
 
-            } else if ((targetNonTerminalIndex < production.size() - 1 &&
-                        hasEpsilonFirstOnly(production[targetNonTerminalIndex + 1]))
-                       || targetNonTerminalIndex == production.size() - 1) {
+                followsMap[targetNonTerminal]->insert(nextToken);
 
-                if (followsMap.find(nonTerminal) != followsMap.end())
-                    followsMap[targetNonTerminal]->insert(followsMap[nonTerminal]->begin(),
-                                                          followsMap[nonTerminal]->end());
+                continue;
+            } else if (targetIndex < maxIndex && !hasEpsilonFirstOnly(nextToken)) {
+                //next token that is non-terminal has other than epsilon in its firsts
 
-                followsMap[nonTerminal] = followsMap[targetNonTerminal];
+                followsMap[targetNonTerminal]->insert(firstsMap[nextToken]->begin(), firstsMap[nextToken]->end());
 
-            } else { //next token that is non-terminal has other than epsilon in its firsts
-                followsMap[targetNonTerminal]->insert(firstsMap[production[targetNonTerminalIndex + 1]]->begin(),
-                                                      firstsMap[production[targetNonTerminalIndex + 1]]->end());
+                eraseEpsilonFromFollows(targetNonTerminal);
+            }
+
+            if ((targetIndex < maxIndex && hasEpsilonInFirsts(nextToken)) || targetIndex == maxIndex) {
+
+                if (followsMap.find(nonTerminal) == followsMap.end()) computeFollows(nonTerminal);
+
+                followsMap[targetNonTerminal]->insert(followsMap[nonTerminal]->begin(), followsMap[nonTerminal]->end());
             }
         }
     }
-
-    followsMap[targetNonTerminal]->erase(followsMap[targetNonTerminal]->find(string(1, CFG::EPSILON)));
-
 }
 
 void ParseTableGenerator::buildParseTable() {
-    int counter=0;
+    int counter = 0;
 
     for (auto &nonTerminal:cfg.nonTerminals) {
         set<string> *firsts = firstsMap[nonTerminal];
         set<string> *follows = followsMap[nonTerminal];
-        int nonIndex=parsingTable->nonTerminalsIndices.at(nonTerminal);
-        if(isFirst(string(1,CFG::EPSILON))){
-                if(isFollow(string(1,ParsingTable::END_OF_TOKENS))){
-                    //CASE 3
-                    int endSign = parsingTable->terminalsIndices.at(string(1,ParsingTable::END_OF_TOKENS));
-                    parsingTable->entriesTable[nonIndex][endSign]=cfg.productions.at(nonTerminal).productions[counter];
+        int nonIndex = parsingTable->nonTerminalsIndices.at(nonTerminal);
+        if (isFirst(string(1, CFG::EPSILON))) {
+            if (isFollow(string(1, ParsingTable::END_OF_TOKENS))) {
+                //CASE 3
+                int endSign = parsingTable->terminalsIndices.at(string(1, ParsingTable::END_OF_TOKENS));
+                parsingTable->entriesTable[nonIndex][endSign] = cfg.productions.at(nonTerminal).productions[counter];
 
 
-                }else{
-                    //CASE 2
-                    for (const auto &follow:followsMap[nonTerminal]) {
-                        int terminalIndexFollow = parsingTable->terminalsIndices.at(follow);
-                        parsingTable->entriesTable[nonIndex][terminalIndexFollow]=cfg.productions.at(nonTerminal).productions[counter];
-                        counter++;
-                    }
-                }
-
-            }else{
-                //CASE 1
-                for (const auto &first:firstsMap[nonTerminal]) {
-                    int terminalIndexFirst = parsingTable->terminalsIndices.at(first);
-                    parsingTable->entriesTable[nonIndex][terminalIndexFirst]=cfg.productions.at(nonTerminal).productions[counter];
+            } else {
+                //CASE 2
+                for (const auto &follow:*followsMap[nonTerminal]) {
+                    int terminalIndexFollow = parsingTable->terminalsIndices.at(follow);
+                    parsingTable->entriesTable[nonIndex][terminalIndexFollow] = cfg.productions.at(
+                            nonTerminal).productions[counter];
                     counter++;
                 }
             }
-            counter=0;
+
+        } else {
+            //CASE 1
+            for (const auto &first:*firstsMap[nonTerminal]) {
+                int terminalIndexFirst = parsingTable->terminalsIndices.at(first);
+                parsingTable->entriesTable[nonIndex][terminalIndexFirst] = cfg.productions.at(
+                        nonTerminal).productions[counter];
+                counter++;
+            }
         }
+        counter = 0;
+    }
 
 }
 
@@ -166,21 +175,21 @@ bool ParseTableGenerator::hasEpsilonFirstOnly(const string &token) {
 }
 
 void ParseTableGenerator::runSimulation(string input) {
-    stack<string> * stack1 = new stack<string>;
+    stack<string> *stack1 = new stack<string>;
     input.push_back(ParsingTable::END_OF_TOKENS);//add endof token to indicate the end of the input string
-    int ptr=0;//arrow on the current char in the input string
-    while(true){
-        if(stack1->top()==string(1,ParsingTable::END_OF_TOKENS)&&input.at(ptr)==ParsingTable::END_OF_TOKENS){
-            cout<<"Successful the input is accepted"<<endl;
+    int ptr = 0;//arrow on the current char in the input string
+    while (true) {
+        if (stack1->top() == string(1, ParsingTable::END_OF_TOKENS) && input.at(ptr) == ParsingTable::END_OF_TOKENS) {
+            cout << "Successful the input is accepted" << endl;
             break;
         }
 
-        if(stack1->empty()&&input.at(ptr)!=ParsingTable::END_OF_TOKENS){
-            cout<<" ERROR Found compilation error at element : "<<input.at(ptr)<<endl;
+        if (stack1->empty() && input.at(ptr) != ParsingTable::END_OF_TOKENS) {
+            cout << " ERROR Found compilation error at element : " << input.at(ptr) << endl;
             break;
         }
-        if(input.at(ptr)==ParsingTable::END_OF_TOKENS&&(!stack1->empty())){
-            cout<<"string accepted and all Non-Terminals go to Epsilon"<<endl;
+        if (input.at(ptr) == ParsingTable::END_OF_TOKENS && (!stack1->empty())) {
+            cout << "string accepted and all Non-Terminals go to Epsilon" << endl;
             break;
         }
         //TODO SHARAF
@@ -197,5 +206,11 @@ bool ParseTableGenerator::isFollow(const string &token) {
     return followsMap.find(token) != followsMap.end();
 }
 
+bool ParseTableGenerator::hasEpsilonInFirsts(const basic_string<char> &nonTerminal) {
+    return firstsMap[nonTerminal]->find(string(1, CFG::EPSILON)) != firstsMap[nonTerminal]->end();
+}
 
-
+void ParseTableGenerator::eraseEpsilonFromFollows(const string &nonTerminal) {
+    if (followsMap[nonTerminal]->find(string(1, CFG::EPSILON)) != followsMap[nonTerminal]->end())
+        followsMap[nonTerminal]->erase(followsMap[nonTerminal]->find(string(1, CFG::EPSILON)));
+}

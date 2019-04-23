@@ -6,8 +6,9 @@
 #define PARSER_GENERATOR_PARSINGTABLE_H
 
 #include <string>
+#include <map>
+#include <set>
 #include <unordered_map>
-#include <unordered_set>
 #include "Production.h"
 
 using namespace std;
@@ -16,7 +17,7 @@ class ParsingTable {
 public:
     static const char END_OF_TOKENS = '$';
 
-    ParsingTable(const unordered_set<string> &terminals, const unordered_set<string> &nonTerminals);
+    ParsingTable(const set<string> &terminals, const set<string> &nonTerminals);
 
     /**
      * A table made for the transitions of a terminal on a given non-terminal.
@@ -28,9 +29,9 @@ public:
     unordered_map<string, int> terminalsIndices;
     unordered_map<string, int> nonTerminalsIndices;
 
-    void initTerminalsIndices(unordered_set<string> terminals);
+    void initTerminalsIndices(set<string> terminals);
 
-    void initNonTerminalsIndices(unordered_set<string> nonTerminals);
+    void initNonTerminalsIndices(set<string> nonTerminals);
 
     void initEntriesTable(unsigned int terminalsSize, unsigned int nonTerminalsSize);
 };
