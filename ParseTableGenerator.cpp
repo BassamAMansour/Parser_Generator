@@ -17,7 +17,7 @@ void ParseTableGenerator::generateParseTable() {
     computeFirsts();
     computeFollows();
     buildParseTable();
-    // runSimulation();
+   // runSimulation();
 }
 
 void ParseTableGenerator::computeFirsts() {
@@ -204,7 +204,7 @@ void ParseTableGenerator::runSimulation(string input) {
     string eps = string(1,ParsingTable::END_OF_TOKENS);
     splits.push_back(eps);
 
-    //TODO stack1->push(first non terminal);
+    stack1.push(string(1,'E'));
     stack1.push(eps);
 
     do {

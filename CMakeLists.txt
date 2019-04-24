@@ -20,4 +20,4 @@ add_executable(Parser_Generator
         CFG_Generator.h
         main.cpp
         ParseTableGenerator.cpp
-        ParseTableGenerator.h)
+        ParseTableGenerator.h Simulator.cpp Simulator.h)

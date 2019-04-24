@@ -2,13 +2,16 @@
 #include <fstream>
 #include "CFG_Generator.h"
 #include "ParseTableGenerator.h"
+#include "Simulator.h"
 
 int main() {
     string language = "../testFiles/test.txt";
+    string input = "../testFiles/input.txt";
     CFG_Generator cfgGenerator(language);
     CFG cfg = cfgGenerator.getCfg();
 
     ParsingTable *parsingTable = ParseTableGenerator(cfg).getParsingTable();
+    Simulator s (input,*parsingTable);
     //PRINTING TABLE
     /*for (int i = 0; i < (int) parsingTable->entriesTable.size(); ++i) {
         for (int j = 0; j < (int) parsingTable->entriesTable[i].size(); ++j) {
