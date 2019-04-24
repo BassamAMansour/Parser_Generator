@@ -14,9 +14,14 @@ Simulator::Simulator(const string &in, const ParsingTable &table) : in(in), tabl
 void Simulator::parsefile() {
     ifstream program;
     program.open(in);
-    string inputStream((std::istreambuf_iterator<char>(program)),
-                       std::istreambuf_iterator<char>());
-    test=inputStream;
+    string line;
+    string inputStream;
+    while (getline(program, line)){
+        inputStream+=line;
+        inputStream+= " ";
+    }
+    program.close();
+    test = inputStream;
 }
 
 void Simulator::run() {
@@ -50,10 +55,35 @@ void Simulator::run() {
             splits.erase(splits.begin());
             continue;
         } else {
-            int i = table.nonTerminalsIndices.at(stack1.top());
-            stack1.pop();
-            int j = table.nonTerminalsIndices.at(splits[0]);
+            auto itr = table.nonTerminalsIndices.find(stack1.top());
+            if (itr == table.nonTerminalsIndices.end()){
+                cout<<"Error matching: " << stack1.top()<<endl;
+                stack1.pop();
+                continue;
+            }
+            int i = itr->second;
+            itr = table.terminalsIndices.find(splits[0]);
+
+            int j;
+            if (itr == table.terminalsIndices.end()){
+                splits.erase(splits.begin());
+                continue;
+            } else {
+                j = itr->second;
+            }
+
             vector<string> newTerminals = table.entriesTable[i][j];
+
+            if (newTerminals[0] == eps) {
+                stack1.pop();
+                continue;
+            } else if (newTerminals.empty()){
+                cout<<"Error"<<endl;
+                splits.erase(splits.begin());
+                continue;
+            }
+
+            stack1.pop();
             for (int k = 0; k == newTerminals.size(); i++)
                 stack1.push(newTerminals[i]);
         }
@@ -69,13 +99,13 @@ void Simulator::splitInput(string input, vector<string> &splitedInput) {
     s = i;
     i = tmp.find(' ', i + 1);
     while (i != string::npos) {
-        splitedInput.push_back(tmp.substr(s, i - s));
+        splitedInput.push_back("'" + tmp.substr(s, i - s) + "'");
         while (i < tmp.length() && tmp.at(i) == ' ') i++;
         s = i;
         i = tmp.find(' ', i + 1);
     }
     if(s < tmp.length())
-        splitedInput.push_back(input.substr(s, tmp.length() - s));
+        splitedInput.push_back("'" + input.substr(s, tmp.length() - s) + "'");
 
 }
 

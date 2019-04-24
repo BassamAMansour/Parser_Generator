@@ -1,6 +1,19 @@
-int x;
-x = 5;
-if (x > 2)
+int
+id
+;
+id
+assign
+digits
+;
+if
+(
+id
+relop
+digits
+)
 {
-x = 0;
+id
+assign
+digits
+;
 }
