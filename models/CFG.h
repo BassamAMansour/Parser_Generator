@@ -27,7 +27,7 @@ public:
     set<string> nonTerminals;
     string startState;
 
-    static const char EPSILON = '&';
+    static const char EPSILON = 126;
 };
 
 

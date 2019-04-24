@@ -51,7 +51,11 @@ void ParseTableGenerator::computeFirsts(string nonTerminal, set<string> &compute
             bool nonEpsilonFirstFound = false;
 
             for (const auto &token:production) {
+
+                if (token.empty()) continue;
+
                 computeFirsts(token, computedFirsts);
+
                 if (!hasEpsilonFirstOnly(token)) {
                     firstsMap[nonTerminal]->insert(firstsMap[token]->begin(), firstsMap[token]->end());
                     nonEpsilonFirstFound = true;

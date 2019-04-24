@@ -1,14 +1,13 @@
 #include <iostream>
-#include <fstream>
 #include "CFG_Generator.h"
 #include "ParseTableGenerator.h"
 #include "Simulator.h"
 
 int main() {
-    string language = "../testFiles/test.txt";
-    string input = "../testFiles/input.txt";
+    string language = "../tests/grammar modified.txt";
+    string input = "../tests/test1.txt";
     CFG_Generator cfgGenerator(language);
-    CFG cfg = cfgGenerator.getCfg();
+    const CFG &cfg = cfgGenerator.getCfg();
 
     ParsingTable *parsingTable = ParseTableGenerator(cfg).getParsingTable();
     Simulator s (input,*parsingTable);
