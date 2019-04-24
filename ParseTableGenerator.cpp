@@ -16,7 +16,7 @@ ParseTableGenerator::ParseTableGenerator(const CFG &cfg) : cfg(cfg) {
 void ParseTableGenerator::generateParseTable() {
     computeFirsts();
     computeFollows();
-   // buildParseTable();
+    buildParseTable();
     // runSimulation();
 }
 
@@ -120,38 +120,62 @@ void ParseTableGenerator::computeFollows(string targetNonTerminal) {
 }
 
 void ParseTableGenerator::buildParseTable() {
+    int tableEntry=0;
     int counter = 0;
     for (auto &nonTerminal:cfg.nonTerminals) {
-        set<string> *firsts = firstsMap[nonTerminal];
-        set<string> *follows = followsMap[nonTerminal];
-        int nonIndex = parsingTable->nonTerminalsIndices.at(nonTerminal);
-        if (isFirst(string(1, CFG::EPSILON))) {
-            if (isFollow(string(1, ParsingTable::END_OF_TOKENS))) {
-                //CASE 3
-                int endSign = parsingTable->terminalsIndices.at(string(1, ParsingTable::END_OF_TOKENS));
-                parsingTable->entriesTable[nonIndex][endSign] = cfg.productions.at(nonTerminal).productions[counter];
-
-
-            } else {
-                //CASE 2
-                for (set<string>::iterator it = follows->begin(); it != follows->end(); ++it) {
-                    int terminalIndexFollow = parsingTable->terminalsIndices.at(*it);
-                    parsingTable->entriesTable[nonIndex][terminalIndexFollow] = cfg.productions.at(
-                            nonTerminal).productions[counter];
-                    counter++;
-                }
-            }
-
-        } else {
-            //CASE 1
-            for (set<string>::iterator it = firsts->begin(); it != firsts->end(); ++it) {
-                int terminalIndexFirst = parsingTable->terminalsIndices.at(*it);
-                parsingTable->entriesTable[nonIndex][terminalIndexFirst] = cfg.productions.at(
-                        nonTerminal).productions[counter];
-                counter++;
-            }
+            set<string> *firsts = firstsMap[nonTerminal];
+            set<string> *follows = followsMap[nonTerminal];
+            vector<string> vecfirst;
+            vector<string> vecfollow;
+        for (set<string>::iterator it = firsts->begin(); it != firsts->end(); ++it) {
+            vecfirst.push_back(*it);
         }
-        counter = 0;
+        for (set<string>::iterator it = follows->begin(); it != follows->end(); ++it) {
+            vecfollow.push_back(*it);
+        }
+            int nonIndex = parsingTable->nonTerminalsIndices.at(nonTerminal);
+
+            if(isFirst(nonTerminal)){
+               // counter=0;
+                vector<vector<string>> p1 = cfg.productions.at(nonTerminal).productions;
+                for (set<string>::iterator it = firsts->begin(); it != firsts->end(); ++it) {
+                    if(*it!=string(1,CFG::EPSILON)){
+                        int terminalIndexFirst = parsingTable->terminalsIndices.at(*it);
+                        tableEntry =getIndexofProduction(p1,*it);
+                        parsingTable->entriesTable[nonIndex][terminalIndexFirst] = p1[tableEntry];
+                      //  counter++;
+                    }else{
+                        for (set<string>::iterator it = follows->begin(); it != follows->end(); ++it) {
+                            int terminalIndexFollow = parsingTable->terminalsIndices.at(*it);
+                            tableEntry=getIndexofProduction(p1,string(1,CFG::EPSILON));
+                            parsingTable->entriesTable[nonIndex][terminalIndexFollow] =p1[tableEntry];
+                           // counter++;
+                        }
+                    }
+                }
+
+                }else{
+                vector<vector<string>> p = cfg.productions.at(nonTerminal).productions;
+                if(p.size()==firsts->size()){
+                  //  counter=0;
+                    for (set<string>::iterator it = firsts->begin(); it != firsts->end(); ++it) {
+                        int terminalIndexFirst = parsingTable->terminalsIndices.at(*it);
+                         tableEntry=getIndexofProduction(p,*it);
+                        parsingTable->entriesTable[nonIndex][terminalIndexFirst] = p[tableEntry];
+                      //  counter++;
+                    }
+                }else{
+                    for (set<string>::iterator it = firsts->begin(); it != firsts->end(); ++it) {
+                        int terminalIndexFirst = parsingTable->terminalsIndices.at(*it);
+                        for(int i=0;i<p[0].size();i++){
+                            // tableEntry=getIndexofProduction(p,*it);
+                            parsingTable->entriesTable[nonIndex][terminalIndexFirst].push_back(p[0].at(i));
+                        }// kanet 0
+                    }
+                }
+
+
+            }
     }
 
 }
@@ -174,35 +198,70 @@ bool ParseTableGenerator::hasEpsilonFirstOnly(const string &token) {
 }
 
 void ParseTableGenerator::runSimulation(string input) {
-    stack<string> *stack1 = new stack<string>;
-    input.push_back(ParsingTable::END_OF_TOKENS);//add endof token to indicate the end of the input string
-    int ptr = 0;//arrow on the current char in the input string
-    while (true) {
-        if (stack1->top() == string(1, ParsingTable::END_OF_TOKENS) && input.at(ptr) == ParsingTable::END_OF_TOKENS) {
-            cout << "Successful the input is accepted" << endl;
+    stack<string> stack1;
+    vector<string> splits;
+    splitInput(input, splits);
+    string eps = string(1,ParsingTable::END_OF_TOKENS);
+    splits.push_back(eps);
+
+    //TODO stack1->push(first non terminal);
+    stack1.push(eps);
+
+    do {
+        if(stack1.top() == eps && splits[0] == eps){
+            cout<<"Successful the input is accepted"<<endl;
             break;
         }
 
-        if (stack1->empty() && input.at(ptr) != ParsingTable::END_OF_TOKENS) {
-            cout << " ERROR Found compilation error at element : " << input.at(ptr) << endl;
+        if(stack1.empty() && splits[0] != eps){
+            cout<<" ERROR Found compilation error at element : "<< splits[0] << endl;
             break;
         }
-        if (input.at(ptr) == ParsingTable::END_OF_TOKENS && (!stack1->empty())) {
-            cout << "string accepted and all Non-Terminals go to Epsilon" << endl;
-            break;
-        }
-        //TODO SHARAF
 
+        if(splits[0] == eps &&(!stack1.empty())){
+            cout<<"string accepted and all Non-Terminals go to Epsilon"<<endl;
+            break;
+        }
+
+        if (stack1.top() == splits[0]){
+            stack1.pop();
+            splits.erase(splits.begin());
+            continue;
+        } else {
+            int i = parsingTable->nonTerminalsIndices.at(stack1.top());
+            stack1.pop();
+            int j = parsingTable->nonTerminalsIndices.at(splits[0]);
+            vector<string> newTerminals = parsingTable->entriesTable[i][j];
+            for (int k = 0; k == newTerminals.size(); i++)
+                stack1.push(newTerminals[i]);
+        }
+    } while (true);
+}
+
+void ParseTableGenerator::splitInput (string input, vector<string> &splitedInput){
+    int i = input.length() - 1, s;
+    while (i < input.length() && input.at(i) == ' ') i--;
+    string tmp = input.substr(0, i + 1);
+    i = 0;
+    while (i < tmp.length() && tmp.at(i) == ' ') i++;
+    s = i;
+    i = tmp.find(' ', i + 1);
+    while (i != string::npos) {
+        splitedInput.push_back(tmp.substr(s, i - s));
+        while (i < tmp.length() && tmp.at(i) == ' ') i++;
+        s = i;
+        i = tmp.find(' ', i + 1);
     }
-
+    if(s < tmp.length())
+        splitedInput.push_back(input.substr(s, tmp.length() - s));
 }
 
 bool ParseTableGenerator::isFirst(const string &token) {
-    return firstsMap.find(token) != firstsMap.end();
+    return firstsMap[token]->find(string(1, CFG::EPSILON)) != firstsMap[token]->end();
 }
 
 bool ParseTableGenerator::isFollow(const string &token) {
-    return followsMap.find(token) != followsMap.end();
+    return followsMap[token]->find(string(1,ParsingTable::END_OF_TOKENS)) != followsMap[token]->end();
 }
 
 bool ParseTableGenerator::hasEpsilonInFirsts(const basic_string<char> &nonTerminal) {
@@ -212,4 +271,15 @@ bool ParseTableGenerator::hasEpsilonInFirsts(const basic_string<char> &nonTermin
 void ParseTableGenerator::eraseEpsilonFromFollows(const string &nonTerminal) {
     if (followsMap[nonTerminal]->find(string(1, CFG::EPSILON)) != followsMap[nonTerminal]->end())
         followsMap[nonTerminal]->erase(followsMap[nonTerminal]->find(string(1, CFG::EPSILON)));
+}
+
+int ParseTableGenerator::getIndexofProduction(vector<vector<string>> p,string token) {
+    for(int i=0;i<p.size();i++){
+        for(int j=0;j<p[i].size();j++){
+            string temp =p[i][j];
+            if(token.compare(temp)==0){
+                return i;
+            }
+        }
+    }
 }

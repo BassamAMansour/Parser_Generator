@@ -2,6 +2,7 @@
 // Created by Bassam on 4/18/2019.
 //
 
+#include <iostream>
 #include "ParsingTable.h"
 
 ParsingTable::ParsingTable(const set<string> &terminals, const set<string> &nonTerminals) {
@@ -26,11 +27,19 @@ void ParsingTable::initNonTerminalsIndices(set<string> nonTerminals) {
 }
 
 void ParsingTable::initEntriesTable(unsigned int terminalsSize, unsigned int nonTerminalsSize) {
-    entriesTable.reserve(nonTerminalsSize);
-
+    /*entriesTable.reserve(nonTerminalsSize);
     for (int i = 0; i < nonTerminalsSize; i++) {
         entriesTable[i].reserve(terminalsSize);
+    }*/
+    for(int i = 0; i < nonTerminalsSize; i++) {
+        vector <vector<string>> w;
+        entriesTable.push_back( w );
+        for(int j = 0; j < (terminalsSize+1); j++){
+            vector <string> v;
+            entriesTable[i].push_back( v );
+        }
     }
 }
+
 
 

@@ -17,6 +17,7 @@ public:
     explicit ParseTableGenerator(const CFG &cfg);
 
     ParsingTable *getParsingTable() const;
+    void printParseTable();
 
 private:
     CFG cfg;
@@ -51,6 +52,10 @@ private:
     bool hasEpsilonInFirsts(const basic_string<char> &nonTerminal);
 
     void eraseEpsilonFromFollows(const string &nonTerminal);
+
+
+    void splitInput (string input, vector<string> &splitedInput);
+    int getIndexofProduction (vector<vector<string>> p,string token);
 };
 
 
