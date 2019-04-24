@@ -16,56 +16,83 @@ void Simulator::parsefile() {
     program.open(in);
     string line;
     string inputStream;
-    while (getline(program, line)){
-        inputStream+=line;
-        inputStream+= " ";
+    while (getline(program, line)) {
+        inputStream += line;
+        inputStream += " ";
     }
     program.close();
     test = inputStream;
 }
 
 void Simulator::run() {
-    stack<string> stack1;
+    vector<string> stack1;
     vector<string> splits;
     splitInput(test, splits);
-    string eps = string(1,ParsingTable::END_OF_TOKENS);
+    string eps = string(1, ParsingTable::END_OF_TOKENS);
     splits.push_back(eps);
 
-    stack1.push(eps);
-    stack1.push(string(1,'E'));
+    stack1.push_back(eps);
+    stack1.push_back(string(1, 'E'));
+
+    cout.width(20);
+    cout << left;
+    cout << "Stack";
+    cout.width(20);
+    cout << left;
+    cout << "Input";
+    cout.width(20);
+    cout << left;
+    cout << "Output";
 
     do {
-        if(stack1.top() == eps && splits[0] == eps){
-            cout<<"Successful the input is accepted"<<endl;
+        cout << endl;
+        int len = 0;
+        for (int l = 0; l < stack1.size(); ++l) {
+            cout << stack1[l] << " ";
+            len += stack1[l].length() + 1;
+        }
+        for (int l = len; l < 20; ++l)cout << " ";
+        len = 0;
+        for (int l = 0; l < splits.size(); ++l) {
+            cout << splits[l] << " ";
+            len += splits[l].length() + 1;
+        }
+        //end print stack + input
+
+        if (stack1.back() == eps && splits[0] == eps) {
+            for (int l = len; l < 20; ++l)cout << " ";
+            cout << "accept";
             break;
         }
 
-        if(stack1.empty() && splits[0] != eps){
-            cout<<" ERROR Found compilation error at element : "<< splits[0] << endl;
+        if (stack1.empty() && splits[0] != eps) {
+            for (int l = len; l < 20; ++l)cout << " ";
+            cout << " ERROR Found compilation error at element : " << splits[0] << endl;
             break;
         }
 
-        if(splits[0] == eps &&(!stack1.empty())){
-            cout<<"string accepted and all Non-Terminals go to Epsilon"<<endl;
-            break;
-        }
+//        if (splits[0] == eps && (!stack1.empty())) {
+//            cout << "string accepted and all Non-Terminals go to Epsilon" << endl;
+//            break;
+//        }
 
-        if (stack1.top() == splits[0]){
-            stack1.pop();
+        if (stack1.back() == splits[0]) {
+            stack1.pop_back();
             splits.erase(splits.begin());
             continue;
         } else {
-            auto itr = table.nonTerminalsIndices.find(stack1.top());
-            if (itr == table.nonTerminalsIndices.end()){
-                cout<<"Error matching: " << stack1.top()<<endl;
-                stack1.pop();
+            auto itr = table.nonTerminalsIndices.find(stack1.back());
+            if (itr == table.nonTerminalsIndices.end()) {
+                for (int l = len; l < 20; ++l)cout << " ";
+                cout << "Error matching: " << stack1.back() << endl;
+                stack1.pop_back();
                 continue;
             }
             int i = itr->second;
             itr = table.terminalsIndices.find(splits[0]);
 
             int j;
-            if (itr == table.terminalsIndices.end()){
+            if (itr == table.terminalsIndices.end()) {
                 splits.erase(splits.begin());
                 continue;
             } else {
@@ -74,18 +101,26 @@ void Simulator::run() {
 
             vector<string> newTerminals = table.entriesTable[i][j];
 
-            if (newTerminals.empty()){
-                cout<<"Error"<<endl;
+            if (newTerminals.empty()) {
+                for (int l = len; l < 20; ++l)cout << " ";
+                cout << "Error" << endl;
                 splits.erase(splits.begin());
                 continue;
-            } else if (newTerminals[0] == eps) {
-                stack1.pop();
+            } else if (newTerminals[0] == "&") {
+                for (int l = len; l < 20; ++l)cout << " ";
+                cout << stack1.back() << "-> &";
+                stack1.pop_back();
                 continue;
             }
 
-            stack1.pop();
-            for (int k = 0; k < newTerminals.size(); k++)
-                stack1.push(newTerminals[k]);
+            for (int l = len; l < 20; ++l)cout << " ";
+            cout << stack1.back() << "-> ";
+            stack1.pop_back();
+            for (int k = newTerminals.size() - 1; k >= 0; k--)
+                stack1.push_back(newTerminals[k]);
+
+            for (int l = 0; l < newTerminals.size(); ++l)
+                cout << newTerminals[l] << " ";
         }
     } while (true);
 }
@@ -104,7 +139,7 @@ void Simulator::splitInput(string input, vector<string> &splitedInput) {
         s = i;
         i = tmp.find(' ', i + 1);
     }
-    if(s < tmp.length())
+    if (s < tmp.length())
         splitedInput.push_back(input.substr(s, tmp.length() - s));
 
 }
