@@ -76,6 +76,8 @@ CFG CFG_Generator::produceCFG() {
         for(int j = 3; j < rules[i].size(); j++){
             string element = rules[i][j];
             if(element[0] == *"‘" || element[0] == *"'"){
+                element.erase(0, 1);
+                element.erase(element.size() - 1);
                 terminals.insert(element);
             } else if(element == "|"){
                 rhsProduction.push_back(accVector);
