@@ -6,9 +6,9 @@
 #define PARSER_GENERATOR_CFG_H
 
 #include <string>
-#include <unordered_set>
+#include <set>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include "Production.h"
 
 using namespace std;
@@ -17,17 +17,17 @@ class CFG {
 
 
 public:
-    CFG(unordered_set<string> set, unordered_set<string> unordered_set, unordered_map<string, Production> map);
+    CFG(set<string> terminalsSet, set <string> nonTerminalsSet, map<string, Production> productionsSet);
 
     CFG();
 
     //The name of the production mapped to the productions
-    unordered_map<string, Production> productions;
-    unordered_set<string> terminals;
-    unordered_set<string> nonTerminals;
+    map<string, Production> productions;
+    set<string> terminals;
+    set<string> nonTerminals;
     string startState;
 
-    static const char EPSILON = 0;
+    static const char EPSILON = '&';
 };
 
 

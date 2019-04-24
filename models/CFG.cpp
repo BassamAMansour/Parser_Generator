@@ -4,10 +4,10 @@
 
 #include "CFG.h"
 
-CFG::CFG(unordered_set<string> t, unordered_set<string> nonT, unordered_map<string, Production> prod) {
-    productions = prod;
-    terminals = t;
-    nonTerminals = nonT;
+CFG::CFG(set<string> terminalsSet, set<string> nonTerminalsSet, map<string, Production> productionsSet) {
+    productions = productionsSet;
+    terminals = terminalsSet;
+    nonTerminals = nonTerminalsSet;
 }
 
 CFG::CFG() {}
