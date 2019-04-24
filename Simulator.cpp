@@ -31,8 +31,8 @@ void Simulator::run() {
     string eps = string(1,ParsingTable::END_OF_TOKENS);
     splits.push_back(eps);
 
-    stack1.push(string(1,'E'));
     stack1.push(eps);
+    stack1.push(string(1,'E'));
 
     do {
         if(stack1.top() == eps && splits[0] == eps){
@@ -74,18 +74,18 @@ void Simulator::run() {
 
             vector<string> newTerminals = table.entriesTable[i][j];
 
-            if (newTerminals[0] == eps) {
-                stack1.pop();
-                continue;
-            } else if (newTerminals.empty()){
+            if (newTerminals.empty()){
                 cout<<"Error"<<endl;
                 splits.erase(splits.begin());
+                continue;
+            } else if (newTerminals[0] == eps) {
+                stack1.pop();
                 continue;
             }
 
             stack1.pop();
-            for (int k = 0; k == newTerminals.size(); i++)
-                stack1.push(newTerminals[i]);
+            for (int k = 0; k < newTerminals.size(); k++)
+                stack1.push(newTerminals[k]);
         }
     } while (true);
 }
@@ -99,13 +99,13 @@ void Simulator::splitInput(string input, vector<string> &splitedInput) {
     s = i;
     i = tmp.find(' ', i + 1);
     while (i != string::npos) {
-        splitedInput.push_back("'" + tmp.substr(s, i - s) + "'");
+        splitedInput.push_back(tmp.substr(s, i - s));
         while (i < tmp.length() && tmp.at(i) == ' ') i++;
         s = i;
         i = tmp.find(' ', i + 1);
     }
     if(s < tmp.length())
-        splitedInput.push_back("'" + input.substr(s, tmp.length() - s) + "'");
+        splitedInput.push_back(input.substr(s, tmp.length() - s));
 
 }
 
