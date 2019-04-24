@@ -10,7 +10,7 @@ int main() {
     const CFG &cfg = cfgGenerator.getCfg();
 
     ParsingTable *parsingTable = ParseTableGenerator(cfg).getParsingTable();
-    Simulator s (input,*parsingTable);
+    Simulator s(input, *parsingTable, cfg.startState);
     //PRINTING TABLE
     /*for (int i = 0; i < (int) parsingTable->entriesTable.size(); ++i) {
         for (int j = 0; j < (int) parsingTable->entriesTable[i].size(); ++j) {

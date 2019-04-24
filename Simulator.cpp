@@ -6,7 +6,8 @@
 #include <fstream>
 #include "Simulator.h"
 
-Simulator::Simulator(const string &in, const ParsingTable &table) : in(in), table(table) {
+Simulator::Simulator(const string &in, const ParsingTable &table, string startState) : in(in), table(table),
+                                                                                       startState(startState) {
     parsefile();
     run();
 }
@@ -32,7 +33,7 @@ void Simulator::run() {
     splits.push_back(eps);
 
     stack1.push_back(eps);
-    stack1.push_back(string(1, 'E'));
+    stack1.push_back(startState);
 
     cout.width(20);
     cout << left;

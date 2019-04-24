@@ -11,12 +11,13 @@
 
 class Simulator {
 public:
-    Simulator(const string &in, const ParsingTable &table);
+    Simulator(const string &in, const ParsingTable &table, string startState);
 
 private:
     string in;
     string test;
     ParsingTable table;
+    string startState;
     void parsefile();
     void run();
     void splitInput (string input, vector<string> &splitedInput);
