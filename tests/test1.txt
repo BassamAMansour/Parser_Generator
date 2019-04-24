@@ -1,10 +1,42 @@
-int  count ;
-while (pass != 10)  {
-pass = pass + 1 ;
+float
+id
+,
+id
+;
+while
+(
+id
+relop
+digits
+)
+{
+id
+assign
+id
+addop
+digits
+;
 }
-if (mnt <= 0) {
-count = count + 1.234;
+if
+(
+id
+assign
+digits
+)
+{
+id
+assign
+id
+addop
+num
+;
 }
-else{
-sum = sum + mnt;
+else
+{
+id
+assign
+id
+addop
+id
+;
 }
